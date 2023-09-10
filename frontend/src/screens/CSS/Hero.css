@@ -1,0 +1,66 @@
+.Hero {
+  height: 90vh;
+  background-image: url("./Assets/02.jpg");
+  background-position: 50%;
+  background-size: cover;
+  background-attachment: scroll;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.HeroBox {
+  width: 75vw;
+  color: white;
+  max-width: 1080px;
+  opacity: 1;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  outline-offset: 0px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 0 solid #000;
+  border-radius: 20px;
+  outline: 3px rgba(255, 255, 255, 0);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 50px;
+  display: block;
+  box-shadow: -4px -4px 12px rgba(255, 237, 238, 0.65),
+    4px 4px 12px rgba(0, 0, 0, 0.26);
+}
+
+.HeroLogo {
+  height: 200px;
+  margin: 0 auto 40px;
+  display: block;
+}
+
+.HeroText {
+  width: 80%;
+  text-align: center;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+}
+
+/* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+@media screen and (max-width: 767px) {
+  .HeroBox {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+@media screen and (max-width: 479px) {
+  .HeroBox {
+    width: 95vw;
+  }
+}

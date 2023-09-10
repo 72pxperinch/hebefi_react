@@ -1,0 +1,125 @@
+/* Style for the card container */
+.back-to-result {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.details {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  max-width: 1440px;
+}
+
+/* Style for the product image container */
+.details-image {
+  flex: 2;
+}
+
+/* Style for the product image */
+.details-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Style for the information container */
+.details-info {
+  flex: 1;
+  padding: 20px;
+  height: 100%;
+}
+
+/* Style for the product title */
+.details-info h4 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Style for the link to reviews */
+.details-info a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* Style for the price */
+.details-info b {
+  color: #f00;
+}
+
+/* Style for the description */
+.details-info div {
+  background-color: pink;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Style for the action container */
+.details-action {
+  flex: 1;
+  padding: 20px;
+  background-color: #f8f8f8;
+  text-align: center;
+}
+
+/* Style for the action list */
+.details-action ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* Style for the price in action container */
+.details-action li:first-child {
+  font-weight: bold;
+  color: #f00;
+}
+
+/* Style for the status in action container */
+.details-action li:nth-child(2) {
+  color: #008000;
+}
+
+/* Style for the quantity select */
+.details-action select {
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Style for the "Add to Cart" button */
+.details-action button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* Additional styling for the button when hovered */
+.details-action button:hover {
+  background-color: #0056b3;
+}
+
+.content-margined {
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.review {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}

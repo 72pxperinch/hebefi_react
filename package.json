@@ -1,0 +1,36 @@
+{
+  "name": "hebefi",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Hebefi E-commerce website",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --watch backend --exec babel-node backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hafidh",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1454.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "dotenv": "^8.6.0",
+    "eslint-plugin-react": "^7.33.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.20",
+    "multer": "^1.4.4",
+    "multer-s3": "^2.10.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.22.15",
+    "@babel/core": "^7.22.17",
+    "@babel/node": "^7.22.15",
+    "@babel/preset-env": "^7.22.15",
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": "12.4.0",
+    "npm": "6.9.0"
+  }
+}

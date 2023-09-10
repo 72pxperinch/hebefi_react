@@ -1,0 +1,55 @@
+.AbtBox {
+  max-width: 1440px;
+  margin: 100px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.abtImg {
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.abtBtn {
+  color: #fff;
+  line-height: inherit;
+  width: 200px;
+  text-align: center;
+  background-color: #feccd1;
+  margin: 50px 0 auto;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 15px;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+.abtBtnBox {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.abtPara {
+  width: 50%;
+  color: #000;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+@media screen and (max-width: 991px) {
+  .AbtBox {
+    margin-top: 20px;
+  }
+  .abtPara {
+    width: 75%;
+    text-align: center;
+  }
+}
