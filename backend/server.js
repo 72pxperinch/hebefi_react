@@ -1,21 +1,16 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import config from './config.js';
-import userRoute from './routes/userRoute.js';
-import productRoute from './routes/productRoute.js';
-import orderRoute from './routes/orderRoute.js';
-import uploadRoute from './routes/uploadRoute.js';
+import config from './config';
+import userRoute from './routes/userRoute';
+import productRoute from './routes/productRoute';
+import orderRoute from './routes/orderRoute';
+import uploadRoute from './routes/uploadRoute';
+import categoryRoute from './routes/categoryRoute';
+import brandRoute from './routes/brandRoute';
 
 const mongodbUrl = config.MONGODB_URL;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-console.log(__dirname)
-
 mongoose
   .connect(mongodbUrl, {
     useNewUrlParser: true,
@@ -29,6 +24,8 @@ app.use(bodyParser.json());
 app.use('/api/uploads', uploadRoute);
 app.use('/api/users', userRoute);
 app.use('/api/products', productRoute);
+app.use('/api/categories', categoryRoute);
+app.use('/api/brands', brandRoute);
 app.use('/api/orders', orderRoute);
 app.get('/api/config/paypal', (req, res) => {
   res.send(config.PAYPAL_CLIENT_ID);

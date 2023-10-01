@@ -9,6 +9,8 @@ import AboutUs from "./Components/AbtUs";
 function HomeScreen(props) {
   const category = props.match.params.id ? props.match.params.id : "";
   const productList = useSelector((state) => state.productList);
+  const st = useSelector((state) => state)
+  console.log(st)
   const { products, loading, error } = productList;
 
   return (
@@ -27,9 +29,9 @@ function HomeScreen(props) {
               <div className="product-list">
                 {products.map((card, index) => (
                   <div key={index} className="product">
-                    <Link to={"/product/" + card._id}>
+                    <Link to={"/product/" + card.product_id}>
                       <img
-                        src={card.image}
+                        src={card.image_url}
                         loading="lazy"
                         alt=""
                         className="product-img"

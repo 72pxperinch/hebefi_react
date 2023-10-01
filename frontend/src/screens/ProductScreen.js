@@ -16,6 +16,8 @@ function ProductScreen(props) {
   const { product, loading, error } = productDetails;
   const productReviewSave = useSelector((state) => state.productReviewSave);
   const { success: productSaveSuccess } = productReviewSave;
+  const st = useSelector((state) => state)
+  console.log(st)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -58,7 +60,7 @@ function ProductScreen(props) {
         <>
           <div className="details">
             <div className="details-image">
-              <img src={product.image} alt="product"></img>
+              <img src={product.image_url} alt="product"></img>
             </div>
             <div className="details-info">
               <ul>
@@ -87,7 +89,7 @@ function ProductScreen(props) {
                 <li>Price: {product.price}</li>
                 <li>
                   Status:{' '}
-                  {product.countInStock > 0 ? 'In Stock' : 'Unavailable.'}
+                  {product.stock_quantity > 0 ? 'In Stock' : 'Unavailable.'}
                 </li>
                 <li>
                   Qty:{' '}
@@ -97,7 +99,7 @@ function ProductScreen(props) {
                       setQty(e.target.value);
                     }}
                   >
-                    {[...Array(product.countInStock).keys()].map((x) => (
+                    {[...Array(product.stock_quantity).keys()].map((x) => (
                       <option key={x + 1} value={x + 1}>
                         {x + 1}
                       </option>
@@ -105,7 +107,7 @@ function ProductScreen(props) {
                   </select>
                 </li>
                 <li>
-                  {product.countInStock > 0 && (
+                  {product.stock_quantity > 0 && (
                     <button
                       onClick={handleAddToCart}
                       className="button primary"
@@ -117,7 +119,7 @@ function ProductScreen(props) {
               </ul>
             </div>
           </div>
-          <div className="content-margined">
+          {/* <div className="content-margined">
             <h2>Reviews</h2>
             {!product.reviews.length && <div>There is no review</div>}
             <ul className="review" id="reviews">
@@ -174,7 +176,7 @@ function ProductScreen(props) {
                 )}
               </li>
             </ul>
-          </div>
+          </div> */}
         </>
       )}
     </div>

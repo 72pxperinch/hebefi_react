@@ -13,7 +13,10 @@ import PlaceOrderScreen from "./screens/PlaceOrderScreen";
 import OrderScreen from "./screens/OrderScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import OrdersScreen from "./screens/OrdersScreen";
-import CategoryScreen from "./screens/CategoryScreen";
+import AdminScreen from "./screens/AdminScreen";
+import CategoryScreen from "./screens/CategoriesScreen";
+import CategoriesScreen from "./screens/CategoriesScreen";
+import BrandsScreen from "./screens/BrandsScreen";
 import Footer from "./screens/Components/Footer";
 
 function App() {
@@ -43,7 +46,10 @@ function App() {
           <Route path="/signin" component={SigninScreen} />
           <Route path="/register" component={RegisterScreen} />
           <Route path="/product/:id" component={ProductScreen} />
+          <Route path="/admin" component={AdminScreen} />
           <Route path="/cart/:id?" component={CartScreen} />
+          <Route path="/categories" component={CategoriesScreen} />
+          <Route path="/brands" component={BrandsScreen} />
           <Route path="/category/:id" component={CategoryScreen} />
           <Route path="/" exact={true} component={HomeScreen} />
         </div>

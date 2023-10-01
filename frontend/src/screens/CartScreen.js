@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import "./CSS/CartScreen.css";
 function CartScreen(props) {
   const cart = useSelector((state) => state.cart);
-
+console.log(cart)
   const { cartItems } = cart;
 
   const productId = props.match.params.id;
@@ -41,7 +41,7 @@ function CartScreen(props) {
         ) : (
           cartItems.map((item, index) => (
             <div key={index} className="cartitems">
-              <img src={item.image} loading="lazy" alt="" className="cartitemimg" />
+              <img src={item.image_url} loading="lazy" alt="" className="cartitemimg" />
               <div className="cartitemnamecard">
                 <Link className="Link" to={"/product/" + item.product}>
                   {item.name}
@@ -57,7 +57,7 @@ function CartScreen(props) {
                     dispatch(addToCart(item.product, e.target.value))
                   }
                 >
-                  {[...Array(item.countInStock).keys()].map((x) => (
+                  {[...Array(item.stock_quantity).keys()].map((x) => (
                     <option key={x + 1} value={x + 1}>
                       {x + 1}
                     </option>

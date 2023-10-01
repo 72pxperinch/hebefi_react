@@ -1,33 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
+import Select from "react-select";
 import {
   saveProduct,
   listProducts,
   deleteProdcut,
 } from "../actions/productActions";
+import {
+  listCategories,
+} from "../actions/categoryActions";
+import {
+  listBrands,
+} from "../actions/brandActions";
 
 function ProductsScreen(props) {
+
   const [modalVisible, setModalVisible] = useState(false);
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
-  const [brand, setBrand] = useState("");
-  const [category, setCategory] = useState("");
+  const [brand_id, setBrand_id] = useState(null);
+  const [category_id, setCategory_id] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [countInStock, setCountInStock] = useState("");
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const productList = useSelector((state) => state.productList);
   const { loading, products, error } = productList;
-
+  const categoryList = useSelector((state) => state.categoryList);
+  const { categories } = categoryList;
+  const brandList = useSelector((state) => state.brandList);
+  const { brands } = brandList;
   const productSave = useSelector((state) => state.productSave);
   const {
     loading: loadingSave,
     success: successSave,
     error: errorSave,
   } = productSave;
-
   const productDelete = useSelector((state) => state.productDelete);
   const {
     loading: loadingDelete,
@@ -35,6 +47,13 @@ function ProductsScreen(props) {
     error: errorDelete,
   } = productDelete;
   const dispatch = useDispatch();
+
+
+
+  useEffect(() => {
+    dispatch(listCategories());
+    dispatch(listBrands());
+  }, []);
 
   useEffect(() => {
     if (successSave) {
@@ -46,16 +65,44 @@ function ProductsScreen(props) {
     };
   }, [successSave, successDelete]);
 
+  const brandOptions = brands.map((brandOption, index) => ({
+    value: brandOption.brand_id,
+    label: brandOption.name,
+  }));
+
+  const categoryOptions = categories.map((categoryOption, index) => ({
+    value: categoryOption.category_id,
+    label: categoryOption.name,
+  }));
+
+  const handleBrandChange = (selectedOption) => {
+    setBrand_id(selectedOption.value);
+    setSelectedBrand(selectedOption.name);
+  };
+
+  const handleCategoryChange = (selectedOption) => {
+    console.log(selectedOption)
+    setCategory_id(selectedOption.value);
+    setSelectedCategory(selectedOption.name);
+    console.log(selectedCategory)
+  };
+
   const openModel = (product) => {
+    console.log(product)
     setModalVisible(true);
-    setId(product._id);
+    setId(product.product_id);
     setName(product.name);
     setPrice(product.price);
     setDescription(product.description);
     setImage(product.image);
-    setBrand(product.brand);
-    setCategory(product.category);
-    setCountInStock(product.countInStock);
+    setBrand_id(product.brand_id);
+    setCategory_id(product.category_id);
+    setCountInStock(product.stock_quantity);
+    setSelectedBrand(product.brand);
+    setSelectedCategory(product.category);
+
+    console.log(selectedCategory)
+    
   };
   const submitHandler = (e) => {
     e.preventDefault();
@@ -65,15 +112,15 @@ function ProductsScreen(props) {
         name,
         price,
         image,
-        brand,
-        category,
+        brand_id,
+        category_id,
         countInStock,
         description,
       })
     );
   };
   const deleteHandler = (product) => {
-    dispatch(deleteProdcut(product._id));
+    dispatch(deleteProdcut(product.product_id));
   };
   const uploadFileHandler = (e) => {
     const file = e.target.files[0];
@@ -147,19 +194,24 @@ function ProductsScreen(props) {
                   onChange={(e) => setImage(e.target.value)}
                   required
                 ></input>
-                <input type="file" onChange={uploadFileHandler} required></input>
+                <input
+                  type="file"
+                  onChange={uploadFileHandler}
+                  required
+                ></input>
                 {uploading && <div>Uploading...</div>}
               </li>
               <li>
                 <label htmlFor="brand">Brand</label>
-                <input
-                  type="text"
-                  name="brand"
-                  value={brand}
+                <Select
                   id="brand"
-                  onChange={(e) => setBrand(e.target.value)}
-                  required
-                ></input>
+                  name="brand"
+                  value={selectedBrand}
+                  onChange={handleBrandChange}
+                  options={brandOptions}
+                  placeholder="-- Select Brand --"
+                  isSearchable={true}
+                />
               </li>
               <li>
                 <label htmlFor="countInStock">CountInStock</label>
@@ -173,15 +225,16 @@ function ProductsScreen(props) {
                 ></input>
               </li>
               <li>
-                <label htmlFor="name">Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={category}
+                <label htmlFor="category">Category</label>
+                <Select
                   id="category"
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                ></input>
+                  name="category"
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  options={categoryOptions}
+                  placeholder="-- Select Category --"
+                  isSearchable={true}
+                />
               </li>
               <li>
                 <label htmlFor="description">Description</label>
@@ -220,17 +273,19 @@ function ProductsScreen(props) {
               <th>Name</th>
               <th>Price</th>
               <th>Category</th>
+              <th>Stock</th>
               <th>Brand</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product._id}>
-                <td>{product._id}</td>
+              <tr key={product.product_id}>
+                <td>{product.product_id}</td>
                 <td>{product.name}</td>
                 <td>{product.price}</td>
                 <td>{product.category}</td>
+                <td>{product.stock_quantity}</td>
                 <td>{product.brand}</td>
                 <td>
                   <button className="button" onClick={() => openModel(product)}>

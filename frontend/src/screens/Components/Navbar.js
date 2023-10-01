@@ -80,13 +80,9 @@ function Navbar () {
                     )}
                     {userInfo && userInfo.isAdmin && (
                       <div className="dropdown nav-link right">
-                        <a href="/profile">Admin</a>
-                        <ul className="dropdown-content">
-                          <li>
-                            <Link to="/orders">Orders</Link>
-                            <Link to="/products">Products</Link>
-                          </li>
-                        </ul>
+                        <Link to="/admin">
+                          Admin
+                        </Link>
                       </div>
                     )}
                   </ul>

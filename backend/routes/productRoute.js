@@ -1,128 +1,300 @@
-import express from 'express';
-import Product from '../models/productModel.js';
-import { isAuth, isAdmin } from '../util.js';
+import express from "express";
+import { isAuth, isAdmin } from "../util";
+import mysql from "mysql2/promise";
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const category = req.query.category ? { category: req.query.category } : {};
-  const searchKeyword = req.query.searchKeyword
-    ? {
-      name: {
-        $regex: req.query.searchKeyword,
-        $options: 'i',
-      },
+const dbConfig = {
+  host: "localhost",
+  user: "root",
+  password: "12345678",
+  database: "hebefi",
+};
+
+// Create a connection pool
+const pool = mysql.createPool(dbConfig);
+
+
+// router.get("/", async (req, res) => {
+//   const category = req.query.category || "";
+//   const searchKeyword = req.query.searchKeyword || "";
+//   const sortOrder = req.query.sortOrder || "newest";
+
+//   let connection;
+//   try {
+//     connection = await pool.getConnection();
+
+//     let sql = "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id";
+//     const conditions = [];
+
+//     if (category) {
+//       conditions.push(`P.category = ?`);
+//     }
+
+//     if (searchKeyword) {
+//       conditions.push(`P.name LIKE ?`);
+//     }
+
+//     if (conditions.length > 0) {
+//       sql += " WHERE " + conditions.join(" AND ");
+//     }
+
+//     if (sortOrder) {
+//       sql += ` ORDER BY P.price ${sortOrder === "lowest" ? "ASC" : "DESC"}`;
+//     }
+
+//     const searchKeywordParam = `%${searchKeyword}%`;
+
+//     const [results] = await connection.query(sql, [category, searchKeywordParam]);
+
+//     res.send(results);
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send({ message: "Internal Server Error" });
+//   } finally {
+//     if (connection) {
+//       connection.release();
+//     }
+//   }
+// });
+
+
+router.get("/", async (req, res) => {
+  const category = req.query.category || "";
+  const searchKeyword = req.query.searchKeyword || "";
+  const sortOrder = req.query.sortOrder || "newest";
+
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    let sql = `
+      SELECT P.*, PI.image_url, B.name AS brand, C.name AS category
+      FROM Products P
+      LEFT JOIN Product_Images PI ON P.product_id = PI.product_id
+      LEFT JOIN Brands B ON P.brand_id = B.brand_id
+      LEFT JOIN Categories C ON P.category_id = C.category_id
+    `;
+    const conditions = [];
+
+    if (category) {
+      conditions.push(`C.name = ?`);
     }
-    : {};
 
-  // const sortOrder = req.query.sortOrder ? req.query.sortOrder === 'lowest' ? { price: 1 } :
-  // { price: -1 } : { _id: -1 };
-  let sortOrder;
-
-  if (req.query.sortOrder) {
-    if (req.query.sortOrder === 'lowest') {
-      sortOrder = { price: 1 };
-    } else {
-      sortOrder = { price: -1 };
+    if (searchKeyword) {
+      conditions.push(`P.name LIKE ?`);
     }
-  } else {
-    sortOrder = { _id: -1 };
-  }
 
-  // if (req.query.sortOrder) {
-  //   if (req.query.sortOrder === 'lowest') {
-  //     sortOrder = { price: 1 };
-  //   } else {
-  //     sortOrder = { price: -1 };
-  //   }
-  // } else {
-  //   sortOrder = { _id: -1 };
-  // }
+    if (conditions.length > 0) {
+      sql += " WHERE " + conditions.join(" AND ");
+    }
 
-  const products = await Product.find({ ...category, ...searchKeyword }).sort(
-    sortOrder,
-  );
-  res.send(products);
-});
+    if (sortOrder) {
+      sql += ` ORDER BY P.price ${sortOrder === "lowest" ? "ASC" : "DESC"}`;
+    }
 
-router.get('/:id', async (req, res) => {
-  const product = await Product.findOne({ _id: req.params.id });
-  if (product) {
-    res.send(product);
-  } else {
-    res.status(404).send({ message: 'Product Not Found.' });
+    const searchKeywordParam = `%${searchKeyword}%`;
+
+    const [results] = await connection.query(sql, [category, searchKeywordParam]);
+
+    res.send(results);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
-router.post('/:id/reviews', isAuth, async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  if (product) {
-    const review = {
-      name: req.body.name,
-      rating: Number(req.body.rating),
-      comment: req.body.comment,
-    };
-    product.reviews.push(review);
-    product.numReviews = product.reviews.length;
-    product.rating = product.reviews.reduce((a, c) => c.rating + a, 0) / product.reviews.length;
-    const updatedProduct = await product.save();
-    res.status(201).send({
-      data: updatedProduct.reviews[updatedProduct.reviews.length - 1],
-      message: 'Review saved successfully.',
-    });
-  } else {
-    res.status(404).send({ message: 'Product Not Found' });
-  }
-});
-router.put('/:id', isAuth, isAdmin, async (req, res) => {
+
+
+
+router.get("/:id", async (req, res) => {
   const productId = req.params.id;
-  const product = await Product.findById(productId);
-  if (product) {
-    product.name = req.body.name;
-    product.price = req.body.price;
-    product.image = req.body.image;
-    product.brand = req.body.brand;
-    product.category = req.body.category;
-    product.countInStock = req.body.countInStock;
-    product.description = req.body.description;
-    const updatedProduct = await product.save();
-    if (updatedProduct) {
-      return res
-        .status(200)
-        .send({ message: 'Product Updated', data: updatedProduct });
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const [results] = await connection.query(
+      "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id WHERE P.product_id = ?",
+      [productId]
+    );
+
+    if (results.length === 1) {
+      res.send(results[0]);
+    } else {
+      res.status(404).send({ message: "Product Not Found." });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
-  return res.status(500).send({ message: ' Error in Updating Product.' });
 });
 
-router.delete('/:id', isAuth, isAdmin, async (req, res) => {
-  const deletedProduct = await Product.findById(req.params.id);
-  if (deletedProduct) {
-    await deletedProduct.remove();
-    res.send({ message: 'Product Deleted' });
-  } else {
-    res.send('Error in Deletion.');
+
+
+router.put("/:id", isAuth, isAdmin, async (req, res) => {
+  const productId = req.params.id;
+  const updatedProductData = req.body;
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    // Begin a transaction
+    await connection.beginTransaction();
+
+    // Update data in Product_Images table
+    const [updateImageResult] = await connection.execute(
+      "UPDATE Product_Images SET image_url = ? WHERE product_id = ?",
+      [updatedProductData.image, productId]
+    );
+
+    if (updateImageResult.affectedRows >= 0) {
+      // If image update is successful, proceed to update data in Products table
+      const [updateProductResult] = await connection.execute(
+        "UPDATE Products SET name = ?, price = ?, brand_id = ?, category_id = ?, stock_quantity = ?, description = ? WHERE product_id = ?",
+        [
+          updatedProductData.name,
+          updatedProductData.price,
+          updatedProductData.brand_id,
+          updatedProductData.category_id,
+          updatedProductData.countInStock,
+          updatedProductData.description,
+          productId,
+        ]
+      );
+
+      if (updateProductResult.affectedRows > 0) {
+        // If product update is successful, commit the transaction
+        await connection.commit();
+        res.status(200).send({ message: "Product Updated", data: updatedProductData });
+      } else {
+        // If product update fails, rollback the transaction
+        await connection.rollback();
+        res.status(404).send({ message: "Product Not Found" });
+      }
+    } else {
+      // If image update fails, rollback the transaction
+      await connection.rollback();
+      res.status(404).send({ message: "Product Images Not Found" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
-router.post('/', isAuth, isAdmin, async (req, res) => {
-  const product = new Product({
-    name: req.body.name,
-    price: req.body.price,
-    image: req.body.image,
-    brand: req.body.brand,
-    category: req.body.category,
-    countInStock: req.body.countInStock,
-    description: req.body.description,
-    rating: req.body.rating,
-    numReviews: req.body.numReviews,
-  });
-  const newProduct = await product.save();
-  if (newProduct) {
-    return res
-      .status(201)
-      .send({ message: 'New Product Created', data: newProduct });
+
+router.delete("/:id", isAuth, isAdmin, async (req, res) => {
+  const productId = req.params.id;
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    
+    // Begin a transaction
+    await connection.beginTransaction();
+
+    // Delete from Product_Images table
+    const [deleteImageResult] = await connection.execute(
+      "DELETE FROM Product_Images WHERE product_id = ?",
+      [productId]
+    );
+
+    if (deleteImageResult.affectedRows > 0) {
+      // If images are deleted successfully, proceed to delete from Products table
+      const [deleteProductResult] = await connection.execute(
+        "DELETE FROM Products WHERE product_id = ?",
+        [productId]
+      );
+
+      if (deleteProductResult.affectedRows > 0) {
+        // If the product is deleted successfully, commit the transaction
+        await connection.commit();
+        res.send({ message: "Product Deleted" });
+      } else {
+        // If product deletion fails, rollback the transaction
+        await connection.rollback();
+        res.status(404).send({ message: "Product Not Found" });
+      }
+    } else {
+      // If image deletion fails, rollback the transaction
+      await connection.rollback();
+      res.status(404).send({ message: "Product Images Not Found" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
-  return res.status(500).send({ message: ' Error in Creating Product.' });
+});
+
+router.post("/", isAuth, isAdmin, async (req, res) => {
+  const newProduct = req.body;
+  console.log(newProduct)
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    await connection.beginTransaction();
+
+    const [insertProductResult] = await connection.execute(
+      "INSERT INTO Products (name, price, brand_id, category_id, stock_quantity, description) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        newProduct.name,
+        newProduct.price,
+        newProduct.brand_id,
+        newProduct.category_id,
+        newProduct.countInStock,
+        newProduct.description,
+      ]
+    );
+
+    const productId = insertProductResult.insertId;
+
+    if (!productId) {
+      throw new Error("Error in Creating Product.");
+    }
+
+    const [insertImageResult] = await connection.execute(
+      "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
+      [productId, newProduct.image]
+    );
+
+    if (!insertImageResult.affectedRows) {
+      throw new Error("Error in Creating Product Image.");
+    }
+
+    await connection.commit();
+
+    newProduct.product_id = productId;
+    res.status(201).send({ message: "New Product Created", data: newProduct });
+  } catch (error) {
+    console.error("Error:", error);
+
+    try {
+      await connection.rollback();
+    } catch (rollbackError) {
+      console.error("Rollback Error:", rollbackError);
+    }
+
+    res.status(500).send({ message: "Internal Server Error" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
 });
 
 export default router;
