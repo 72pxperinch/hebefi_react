@@ -1,5 +1,5 @@
 import express from "express";
-import { isAuth, isAdmin } from "../util";
+import { isAuth, isAdmin } from "../util.js";
 import mysql from "mysql2/promise";
 
 const router = express.Router();
@@ -14,7 +14,6 @@ const dbConfig = {
 // Create a connection pool
 const pool = mysql.createPool(dbConfig);
 
-
 // router.get("/", async (req, res) => {
 //   const category = req.query.category || "";
 //   const searchKeyword = req.query.searchKeyword || "";
@@ -24,11 +23,19 @@ const pool = mysql.createPool(dbConfig);
 //   try {
 //     connection = await pool.getConnection();
 
-//     let sql = "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id";
+//     let sql = `
+//       SELECT P.*, 
+//              (SELECT PI.image_url FROM Product_Images PI WHERE PI.product_id = P.product_id LIMIT 1) AS image_url, 
+//              B.name AS brand, 
+//              C.name AS category
+//       FROM Products P
+//       LEFT JOIN Brands B ON P.brand_id = B.brand_id
+//       LEFT JOIN Categories C ON P.category_id = C.category_id
+//     `;
 //     const conditions = [];
 
 //     if (category) {
-//       conditions.push(`P.category = ?`);
+//       conditions.push(`C.name = ?`);
 //     }
 
 //     if (searchKeyword) {
@@ -58,7 +65,6 @@ const pool = mysql.createPool(dbConfig);
 //   }
 // });
 
-
 router.get("/", async (req, res) => {
   const category = req.query.category || "";
   const searchKeyword = req.query.searchKeyword || "";
@@ -69,7 +75,7 @@ router.get("/", async (req, res) => {
     connection = await pool.getConnection();
 
     let sql = `
-      SELECT P.*, PI.image_url, B.name AS brand, C.name AS category
+      SELECT P.*, GROUP_CONCAT(PI.image_url) AS images, B.name AS brand, C.name AS category
       FROM Products P
       LEFT JOIN Product_Images PI ON P.product_id = PI.product_id
       LEFT JOIN Brands B ON P.brand_id = B.brand_id
@@ -90,14 +96,25 @@ router.get("/", async (req, res) => {
     }
 
     if (sortOrder) {
-      sql += ` ORDER BY P.price ${sortOrder === "lowest" ? "ASC" : "DESC"}`;
+      sql += ` GROUP BY P.product_id ORDER BY P.price ${
+        sortOrder === "lowest" ? "ASC" : "DESC"
+      }`;
     }
 
     const searchKeywordParam = `%${searchKeyword}%`;
 
-    const [results] = await connection.query(sql, [category, searchKeywordParam]);
+    const [results] = await connection.query(sql, [
+      category,
+      searchKeywordParam,
+    ]);
 
-    res.send(results);
+    // Convert the comma-separated images string to an array
+    const productsWithImages = results.map((product) => ({
+      ...product,
+      images: product.images ? product.images.split(",") : [],
+    }));
+
+    res.send(productsWithImages);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({ message: "Internal Server Error" });
@@ -110,6 +127,32 @@ router.get("/", async (req, res) => {
 
 
 
+// router.get("/:id", async (req, res) => {
+//   const productId = req.params.id;
+//   let connection;
+//   try {
+//     connection = await pool.getConnection();
+
+//     const [results] = await connection.query(
+//       "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id WHERE P.product_id = ?",
+//       [productId]
+//     );
+
+//     if (results.length === 1) {
+//       res.send(results[0]);
+//     } else {
+//       res.status(404).send({ message: "Product Not Found." });
+//     }
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send({ message: "Internal Server Error" });
+//   } finally {
+//     if (connection) {
+//       connection.release();
+//     }
+//   }
+// });
+
 router.get("/:id", async (req, res) => {
   const productId = req.params.id;
   let connection;
@@ -117,12 +160,15 @@ router.get("/:id", async (req, res) => {
     connection = await pool.getConnection();
 
     const [results] = await connection.query(
-      "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id WHERE P.product_id = ?",
+      "SELECT P.*, GROUP_CONCAT(PI.image_url) AS images FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id WHERE P.product_id = ?",
       [productId]
     );
 
     if (results.length === 1) {
-      res.send(results[0]);
+      const product = results[0];
+      // Convert the comma-separated images string to an array
+      product.images = product.images ? product.images.split(",") : [];
+      res.send(product);
     } else {
       res.status(404).send({ message: "Product Not Found." });
     }
@@ -135,7 +181,6 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-
 
 
 router.put("/:id", isAuth, isAdmin, async (req, res) => {
@@ -240,9 +285,65 @@ router.delete("/:id", isAuth, isAdmin, async (req, res) => {
   }
 });
 
+// router.post("/", isAuth, isAdmin, async (req, res) => {
+//   const newProduct = req.body;
+//   console.log(newProduct)
+//   let connection;
+//   try {
+//     connection = await pool.getConnection();
+
+//     await connection.beginTransaction();
+
+//     const [insertProductResult] = await connection.execute(
+//       "INSERT INTO Products (name, price, brand_id, category_id, stock_quantity, description) VALUES (?, ?, ?, ?, ?, ?)",
+//       [
+//         newProduct.name,
+//         newProduct.price,
+//         newProduct.brand_id,
+//         newProduct.category_id,
+//         newProduct.countInStock,
+//         newProduct.description,
+//       ]
+//     );
+
+//     const productId = insertProductResult.insertId;
+
+//     if (!productId) {
+//       throw new Error("Error in Creating Product.");
+//     }
+
+//     const [insertImageResult] = await connection.execute(
+//       "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
+//       [productId, newProduct.image]
+//     );
+
+//     if (!insertImageResult.affectedRows) {
+//       throw new Error("Error in Creating Product Image.");
+//     }
+
+//     await connection.commit();
+
+//     newProduct.product_id = productId;
+//     res.status(201).send({ message: "New Product Created", data: newProduct });
+//   } catch (error) {
+//     console.error("Error:", error);
+
+//     try {
+//       await connection.rollback();
+//     } catch (rollbackError) {
+//       console.error("Rollback Error:", rollbackError);
+//     }
+
+//     res.status(500).send({ message: "Internal Server Error" });
+//   } finally {
+//     if (connection) {
+//       connection.release();
+//     }
+//   }
+// });
 router.post("/", isAuth, isAdmin, async (req, res) => {
   const newProduct = req.body;
-  console.log(newProduct)
+  console.log(newProduct);
   let connection;
   try {
     connection = await pool.getConnection();
@@ -267,13 +368,16 @@ router.post("/", isAuth, isAdmin, async (req, res) => {
       throw new Error("Error in Creating Product.");
     }
 
-    const [insertImageResult] = await connection.execute(
-      "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
-      [productId, newProduct.image]
-    );
+    // Iterate through the images array and insert each image into the Product_Images table
+    for (const imageUrl of newProduct.images) {
+      const [insertImageResult] = await connection.execute(
+        "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
+        [productId, imageUrl]
+      );
 
-    if (!insertImageResult.affectedRows) {
-      throw new Error("Error in Creating Product Image.");
+      if (!insertImageResult.affectedRows) {
+        throw new Error("Error in Creating Product Image.");
+      }
     }
 
     await connection.commit();

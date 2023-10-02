@@ -5,17 +5,12 @@ import Select from "react-select";
 import {
   saveProduct,
   listProducts,
-  deleteProdcut,
+  deleteProduct,
 } from "../actions/productActions";
-import {
-  listCategories,
-} from "../actions/categoryActions";
-import {
-  listBrands,
-} from "../actions/brandActions";
+import { listCategories } from "../actions/categoryActions";
+import { listBrands } from "../actions/brandActions";
 
 function ProductsScreen(props) {
-
   const [modalVisible, setModalVisible] = useState(false);
   const [id, setId] = useState("");
   const [name, setName] = useState("");
@@ -29,7 +24,7 @@ function ProductsScreen(props) {
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const productList = useSelector((state) => state.productList);
-  const { loading, products, error } = productList;
+  const { products } = productList;
   const categoryList = useSelector((state) => state.categoryList);
   const { categories } = categoryList;
   const brandList = useSelector((state) => state.brandList);
@@ -48,7 +43,7 @@ function ProductsScreen(props) {
   } = productDelete;
   const dispatch = useDispatch();
 
-
+  const [images, setImages] = useState([]); // Updated to store multiple images
 
   useEffect(() => {
     dispatch(listCategories());
@@ -81,14 +76,14 @@ function ProductsScreen(props) {
   };
 
   const handleCategoryChange = (selectedOption) => {
-    console.log(selectedOption)
+    console.log(selectedOption);
     setCategory_id(selectedOption.value);
     setSelectedCategory(selectedOption.name);
-    console.log(selectedCategory)
+    console.log(selectedCategory);
   };
 
   const openModel = (product) => {
-    console.log(product)
+    console.log(product);
     setModalVisible(true);
     setId(product.product_id);
     setName(product.name);
@@ -101,8 +96,7 @@ function ProductsScreen(props) {
     setSelectedBrand(product.brand);
     setSelectedCategory(product.category);
 
-    console.log(selectedCategory)
-    
+    console.log(selectedCategory);
   };
   const submitHandler = (e) => {
     e.preventDefault();
@@ -111,7 +105,7 @@ function ProductsScreen(props) {
         _id: id,
         name,
         price,
-        image,
+        images,
         brand_id,
         category_id,
         countInStock,
@@ -120,28 +114,53 @@ function ProductsScreen(props) {
     );
   };
   const deleteHandler = (product) => {
-    dispatch(deleteProdcut(product.product_id));
+    dispatch(deleteProduct(product.product_id));
   };
-  const uploadFileHandler = (e) => {
-    const file = e.target.files[0];
-    const bodyFormData = new FormData();
-    bodyFormData.append("image", file);
-    setUploading(true);
-    axios
-      .post("/api/uploads", bodyFormData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        setImage(response.data);
-        setUploading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setUploading(false);
-      });
+
+  // const uploadFileHandler = (e) => {
+  //   const file = e.target.files[0];
+  //   const bodyFormData = new FormData();
+  //   bodyFormData.append("image", file);
+  //   setUploading(true);
+  //   axios
+  //     .post("/api/uploads", bodyFormData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     })
+  //     .then((response) => {
+  //       setImage(response.data);
+  //       setUploading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       setUploading(false);
+  //     });
+  // };
+
+  const uploadFileHandler = async (e) => {
+    const files = e.target.files;
+    const newImages = [];
+
+    for (const file of files) {
+      const bodyFormData = new FormData();
+      bodyFormData.append("image", file);
+
+      try {
+        const response = await axios.post("/api/uploads", bodyFormData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        newImages.push(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    setImages(newImages);
   };
+
   return (
     <div className="content content-margined">
       <div className="product-header">
@@ -185,6 +204,26 @@ function ProductsScreen(props) {
                 ></input>
               </li>
               <li>
+                <label htmlFor="image">Images</label>
+                <input
+                  type="file"
+                  multiple // Allow multiple file selection
+                  onChange={uploadFileHandler}
+                  required
+                ></input>
+                {uploading && <div>Uploading...</div>}
+                {images.length > 0 && (
+                  <ul>
+                    {images.map((imageUrl, index) => (
+                      <li key={index}>
+                        <img src={imageUrl} alt={`Product Image ${index}`} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+
+              {/*<li>
                 <label htmlFor="image">Image</label>
                 <input
                   type="text"
@@ -200,7 +239,7 @@ function ProductsScreen(props) {
                   required
                 ></input>
                 {uploading && <div>Uploading...</div>}
-              </li>
+              </li> */}
               <li>
                 <label htmlFor="brand">Brand</label>
                 <Select

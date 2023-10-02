@@ -60,7 +60,7 @@ function ProductScreen(props) {
         <>
           <div className="details">
             <div className="details-image">
-              <img src={product.image_url} alt="product"></img>
+              <img src={product.images} alt="product"></img>
             </div>
             <div className="details-info">
               <ul>

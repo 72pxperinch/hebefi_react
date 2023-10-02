@@ -1,5 +1,5 @@
 import express from "express";
-import { isAuth, isAdmin } from "../util";
+import { isAuth, isAdmin } from "../util.js";
 import mysql from "mysql2/promise";
 
 const router = express.Router();

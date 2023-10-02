@@ -31,7 +31,7 @@ function HomeScreen(props) {
                   <div key={index} className="product">
                     <Link to={"/product/" + card.product_id}>
                       <img
-                        src={card.image_url}
+                        src={card.images[0]}
                         loading="lazy"
                         alt=""
                         className="product-img"
