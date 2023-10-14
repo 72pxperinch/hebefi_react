@@ -8,7 +8,8 @@ function PlaceOrderScreen(props) {
   const cart = useSelector(state => state.cart);
   const orderCreate = useSelector(state => state.orderCreate);
   const { loading, success, error, order } = orderCreate;
-
+const st = useSelector(state => state)
+console.log(st)
   const { cartItems, shipping, payment } = cart;
   if (!shipping.address) {
     props.history.push("/shipping");
@@ -74,7 +75,7 @@ function PlaceOrderScreen(props) {
                 cartItems.map(item =>
                   <li>
                     <div className="cart-image">
-                      <img src={item.image} alt="product" />
+                      <img src={item.images} alt="product" />
                     </div>
                     <div className="cart-name">
                       <div>

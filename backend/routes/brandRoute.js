@@ -100,30 +100,42 @@ router.put("/:id", isAuth, isAdmin, async (req, res) => {
     }
   }
 });
-
 router.delete("/:id", isAuth, isAdmin, async (req, res) => {
-  const BrandId = req.params.id;
+  const brandId = req.params.id;
   let connection;
   try {
     connection = await pool.getConnection();
 
-    // Begin a transaction
-    await connection.beginTransaction();
-
-    // Delete from Brands table
-    const [deleteBrandResult] = await connection.execute(
-      "DELETE FROM Brands WHERE brand_id = ?",
-      [BrandId]
+    // Check if there are any products associated with this brand
+    const [checkProductsResult] = await connection.execute(
+      "SELECT COUNT(*) AS productCount FROM Products WHERE brand_id = ?",
+      [brandId]
     );
 
-    if (deleteBrandResult.affectedRows > 0) {
-      // If the Brand is deleted successfully, commit the transaction
-      await connection.commit();
-      res.send({ message: "Brand Deleted" });
+    const productCount = checkProductsResult[0].productCount;
+
+    if (productCount > 0) {
+      // If there are products associated with this brand, send an error response
+      res.status(400).send({ message: "Brand has associated products. Cannot delete." });
     } else {
-      // If Brand deletion fails, rollback the transaction
-      await connection.rollback();
-      res.status(404).send({ message: "Brand Not Found" });
+      // Begin a transaction
+      await connection.beginTransaction();
+
+      // Delete from Brands table
+      const [deleteBrandResult] = await connection.execute(
+        "DELETE FROM Brands WHERE brand_id = ?",
+        [brandId]
+      );
+
+      if (deleteBrandResult.affectedRows > 0) {
+        // If the brand is deleted successfully, commit the transaction
+        await connection.commit();
+        res.send({ message: "Brand Deleted" });
+      } else {
+        // If brand deletion fails, rollback the transaction
+        await connection.rollback();
+        res.status(404).send({ message: "Brand Not Found" });
+      }
     }
   } catch (error) {
     console.error("Error:", error);
@@ -134,6 +146,7 @@ router.delete("/:id", isAuth, isAdmin, async (req, res) => {
     }
   }
 });
+
 
 
 router.post("/", isAuth, isAdmin, async (req, res) => {

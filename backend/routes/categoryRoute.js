@@ -99,31 +99,42 @@ router.put("/:id", isAuth, isAdmin, async (req, res) => {
       connection.release();
     }
   }
-});
-
-router.delete("/:id", isAuth, isAdmin, async (req, res) => {
-  const CategoryId = req.params.id;
+});router.delete("/:id", isAuth, isAdmin, async (req, res) => {
+  const categoryId = req.params.id;
   let connection;
   try {
     connection = await pool.getConnection();
 
-    // Begin a transaction
-    await connection.beginTransaction();
-
-    // Delete from categories table
-    const [deleteCategoryResult] = await connection.execute(
-      "DELETE FROM categories WHERE category_id = ?",
-      [CategoryId]
+    // Check if there are any products associated with this category
+    const [checkProductsResult] = await connection.execute(
+      "SELECT COUNT(*) AS productCount FROM Products WHERE category_id = ?",
+      [categoryId]
     );
 
-    if (deleteCategoryResult.affectedRows > 0) {
-      // If the Category is deleted successfully, commit the transaction
-      await connection.commit();
-      res.send({ message: "Category Deleted" });
+    const productCount = checkProductsResult[0].productCount;
+
+    if (productCount > 0) {
+      // If there are products associated with this category, send an error response
+      res.status(400).send({ message: "Category has associated products. Cannot delete." });
     } else {
-      // If Category deletion fails, rollback the transaction
-      await connection.rollback();
-      res.status(404).send({ message: "Category Not Found" });
+      // Begin a transaction
+      await connection.beginTransaction();
+
+      // Delete from categories table
+      const [deleteCategoryResult] = await connection.execute(
+        "DELETE FROM categories WHERE category_id = ?",
+        [categoryId]
+      );
+
+      if (deleteCategoryResult.affectedRows > 0) {
+        // If the category is deleted successfully, commit the transaction
+        await connection.commit();
+        res.send({ message: "Category Deleted" });
+      } else {
+        // If category deletion fails, rollback the transaction
+        await connection.rollback();
+        res.status(404).send({ message: "Category Not Found" });
+      }
     }
   } catch (error) {
     console.error("Error:", error);
@@ -134,6 +145,7 @@ router.delete("/:id", isAuth, isAdmin, async (req, res) => {
     }
   }
 });
+
 
 
 router.post("/", isAuth, isAdmin, async (req, res) => {

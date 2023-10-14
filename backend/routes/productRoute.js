@@ -126,33 +126,6 @@ router.get("/", async (req, res) => {
 });
 
 
-
-// router.get("/:id", async (req, res) => {
-//   const productId = req.params.id;
-//   let connection;
-//   try {
-//     connection = await pool.getConnection();
-
-//     const [results] = await connection.query(
-//       "SELECT P.*, PI.image_url FROM Products P LEFT JOIN Product_Images PI ON P.product_id = PI.product_id WHERE P.product_id = ?",
-//       [productId]
-//     );
-
-//     if (results.length === 1) {
-//       res.send(results[0]);
-//     } else {
-//       res.status(404).send({ message: "Product Not Found." });
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     res.status(500).send({ message: "Internal Server Error" });
-//   } finally {
-//     if (connection) {
-//       connection.release();
-//     }
-//   }
-// });
-
 router.get("/:id", async (req, res) => {
   const productId = req.params.id;
   let connection;

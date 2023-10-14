@@ -41,7 +41,7 @@ console.log(cart)
         ) : (
           cartItems.map((item, index) => (
             <div key={index} className="cartitems">
-              <img src={item.image_url} loading="lazy" alt="" className="cartitemimg" />
+              <img src={item.images} loading="lazy" alt="" className="cartitemimg" />
               <div className="cartitemnamecard">
                 <Link className="Link" to={"/product/" + item.product}>
                   {item.name}
