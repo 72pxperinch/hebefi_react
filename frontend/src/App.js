@@ -18,6 +18,8 @@ import CategoryScreen from "./screens/CategoriesScreen";
 import CategoriesScreen from "./screens/CategoriesScreen";
 import BrandsScreen from "./screens/BrandsScreen";
 import Footer from "./screens/Components/Footer";
+import AddressesScreen from "./screens/AddressesScreen";
+import PaymentsScreen from "./screens/PaymentsScreen";
 
 function App() {
   const [on, setOn] = useState("menu");
@@ -41,7 +43,9 @@ function App() {
           <Route path="/order/:id" component={OrderScreen} />
           <Route path="/products" component={ProductsScreen} />
           <Route path="/shipping" component={ShippingScreen} />
+          <Route path="/addresses" component={AddressesScreen} />
           <Route path="/payment" component={PaymentScreen} />
+          <Route path="/payments" component={PaymentsScreen} />
           <Route path="/placeorder" component={PlaceOrderScreen} />
           <Route path="/signin" component={SigninScreen} />
           <Route path="/register" component={RegisterScreen} />

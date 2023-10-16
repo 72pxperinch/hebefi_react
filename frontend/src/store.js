@@ -18,6 +18,18 @@ import {
   brandSaveReducer,
   brandDeleteReducer,
 } from './reducers/brandReducers';
+import {
+  paymentListReducer,
+  paymentSaveReducer,
+  paymentDeleteReducer,
+  paymentDetailsReducer
+} from './reducers/paymentReducers';
+import {
+  addressListReducer,
+  addressSaveReducer,
+  addressDeleteReducer,
+  addressDetailsReducer,
+} from './reducers/addressReducers';
 import { cartReducer } from './reducers/cartReducers';
 import {
   userSigninReducer,
@@ -55,6 +67,14 @@ const reducer = combineReducers({
   brandList: brandListReducer,
   brandSave: brandSaveReducer,
   brandDelete: brandDeleteReducer,
+  paymentList: paymentListReducer,
+  paymentSave: paymentSaveReducer,
+  paymentDelete: paymentDeleteReducer,
+  paymentDetails: paymentDetailsReducer,
+  addressList: addressListReducer,
+  addressSave: addressSaveReducer,
+  addressDelete: addressDeleteReducer,
+  addressDetails: addressDetailsReducer,
   orderCreate: orderCreateReducer,
   orderDetails: orderDetailsReducer,
   orderPay: orderPayReducer,

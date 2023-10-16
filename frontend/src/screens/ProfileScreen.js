@@ -37,66 +37,97 @@ function ProfileScreen(props) {
     };
   }, [userInfo])
 
-  return <div className="profile">
-    <div className="profile-info">
-      <div className="form">
-        <form onSubmit={submitHandler} >
-          <ul className="form-container">
-            <li>
-              <h2>User Profile</h2>
-            </li>
-            <li>
-              {loading && <div>Loading...</div>}
-              {error && <div>{error}</div>}
-              {success && <div>Profile Saved Successfully.</div>}
-            </li>
-            <li>
-              <label htmlFor="name">
-                Name
-          </label>
-              <input value={name} type="name" name="name" id="name" onChange={(e) => setName(e.target.value)}>
-              </input>
-            </li>
-            <li>
-              <label htmlFor="email">
-                Email
-          </label>
-              <input value={email} type="email" name="email" id="email" onChange={(e) => setEmail(e.target.value)}>
-              </input>
-            </li>
-            <li>
-              <label htmlFor="password">Password</label>
-              <input value={password || ""} type="password" id="password" name="password" onChange={(e) => setPassword(e.target.value)}>
-              </input>
-            </li>
-
-            <li>
-              <button type="submit" className="button primary">Update</button>
-            </li>
-            <li>
-              <button type="button" onClick={handleLogout} className="button secondary full-width">Logout</button>
-            </li>
-
-          </ul>
-        </form>
+  return (
+    <div className="profile">
+      <div className="profile-info">
+        <div className="form">
+          <form onSubmit={submitHandler}>
+            <ul className="form-container">
+              <li>
+                <h2>User Profile</h2>
+              </li>
+              <li>
+                {loading && <div>Loading...</div>}
+                {error && <div>{error}</div>}
+                {success && <div>Profile Saved Successfully.</div>}
+              </li>
+              <li>
+                <label htmlFor="name">Name</label>
+                <input
+                  value={name}
+                  type="name"
+                  name="name"
+                  id="name"
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </li>
+              <li>
+                <label htmlFor="email">Email</label>
+                <input
+                  value={email}
+                  type="email"
+                  name="email"
+                  id="email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </li>
+              <li>
+                <label htmlFor="password">Password</label>
+                <input
+                  value={password || ""}
+                  type="password"
+                  id="password"
+                  name="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </li>
+              <li>
+                <button type="submit" className="button primary">
+                  Update
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="button secondary full-width"
+                >
+                  Logout
+                </button>
+              </li>
+              <li>
+                <Link to="/payments" className="button secondary full-width">
+                  Payment Methods
+                </Link>
+              </li>
+              <li>
+                <Link to="/addresses" className="button secondary full-width">
+                  Saved Addresses
+                </Link>
+              </li>
+            </ul>
+          </form>
+        </div>
       </div>
-    </div>
-    <div className="profile-orders content-margined">
-      {
-        loadingOrders ? <div>Loading...</div> :
-          errorOrders ? <div>{errorOrders} </div> :
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>DATE</th>
-                  <th>TOTAL</th>
-                  <th>PAID</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => <tr key={order._id}>
+      <div className="profile-orders content-margined">
+        {loadingOrders ? (
+          <div>Loading...</div>
+        ) : errorOrders ? (
+          <div>{errorOrders} </div>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>DATE</th>
+                <th>TOTAL</th>
+                <th>PAID</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id}>
                   <td>{order._id}</td>
                   <td>{order.createdAt}</td>
                   <td>{order.totalPrice}</td>
@@ -104,12 +135,15 @@ function ProfileScreen(props) {
                   <td>
                     <Link to={"/order/" + order._id}>DETAILS</Link>
                   </td>
-                </tr>)}
-              </tbody>
-            </table>
-      }
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
-  </div>
+  );
+  
 }
 
 export default ProfileScreen;

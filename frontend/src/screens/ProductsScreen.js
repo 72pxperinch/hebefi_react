@@ -117,27 +117,6 @@ function ProductsScreen(props) {
     dispatch(deleteProduct(product.product_id));
   };
 
-  // const uploadFileHandler = (e) => {
-  //   const file = e.target.files[0];
-  //   const bodyFormData = new FormData();
-  //   bodyFormData.append("image", file);
-  //   setUploading(true);
-  //   axios
-  //     .post("/api/uploads", bodyFormData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     })
-  //     .then((response) => {
-  //       setImage(response.data);
-  //       setUploading(false);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //       setUploading(false);
-  //     });
-  // };
-
   const uploadFileHandler = async (e) => {
     const files = e.target.files;
     const newImages = [];
@@ -145,7 +124,6 @@ function ProductsScreen(props) {
     for (const file of files) {
       const bodyFormData = new FormData();
       bodyFormData.append("image", file);
-
       try {
         const response = await axios.post("/api/uploads", bodyFormData, {
           headers: {
@@ -223,23 +201,6 @@ function ProductsScreen(props) {
                 )}
               </li>
 
-              {/*<li>
-                <label htmlFor="image">Image</label>
-                <input
-                  type="text"
-                  name="image"
-                  value={image}
-                  id="image"
-                  onChange={(e) => setImage(e.target.value)}
-                  required
-                ></input>
-                <input
-                  type="file"
-                  onChange={uploadFileHandler}
-                  required
-                ></input>
-                {uploading && <div>Uploading...</div>}
-              </li> */}
               <li>
                 <label htmlFor="brand">Brand</label>
                 <Select

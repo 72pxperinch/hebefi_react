@@ -6,7 +6,7 @@ const getToken = (user) => {
       _id: user.user_id,
       name: user.username,
       email: user.email,
-      isAdmin: user.isAdmin,
+      isAdmin: user.is_admin,
     },
     config.JWT_SECRET,
     {
@@ -17,7 +17,6 @@ const getToken = (user) => {
 
 const isAuth = (req, res, next) => {
   const token = req.headers.authorization;
-  console.log(token)
 
   if (token) {
     const onlyToken = token.slice(7, token.length);

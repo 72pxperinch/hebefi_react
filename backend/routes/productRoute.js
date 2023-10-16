@@ -14,56 +14,6 @@ const dbConfig = {
 // Create a connection pool
 const pool = mysql.createPool(dbConfig);
 
-// router.get("/", async (req, res) => {
-//   const category = req.query.category || "";
-//   const searchKeyword = req.query.searchKeyword || "";
-//   const sortOrder = req.query.sortOrder || "newest";
-
-//   let connection;
-//   try {
-//     connection = await pool.getConnection();
-
-//     let sql = `
-//       SELECT P.*, 
-//              (SELECT PI.image_url FROM Product_Images PI WHERE PI.product_id = P.product_id LIMIT 1) AS image_url, 
-//              B.name AS brand, 
-//              C.name AS category
-//       FROM Products P
-//       LEFT JOIN Brands B ON P.brand_id = B.brand_id
-//       LEFT JOIN Categories C ON P.category_id = C.category_id
-//     `;
-//     const conditions = [];
-
-//     if (category) {
-//       conditions.push(`C.name = ?`);
-//     }
-
-//     if (searchKeyword) {
-//       conditions.push(`P.name LIKE ?`);
-//     }
-
-//     if (conditions.length > 0) {
-//       sql += " WHERE " + conditions.join(" AND ");
-//     }
-
-//     if (sortOrder) {
-//       sql += ` ORDER BY P.price ${sortOrder === "lowest" ? "ASC" : "DESC"}`;
-//     }
-
-//     const searchKeywordParam = `%${searchKeyword}%`;
-
-//     const [results] = await connection.query(sql, [category, searchKeywordParam]);
-
-//     res.send(results);
-//   } catch (error) {
-//     console.error("Error:", error);
-//     res.status(500).send({ message: "Internal Server Error" });
-//   } finally {
-//     if (connection) {
-//       connection.release();
-//     }
-//   }
-// });
 
 router.get("/", async (req, res) => {
   const category = req.query.category || "";
@@ -159,6 +109,7 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", isAuth, isAdmin, async (req, res) => {
   const productId = req.params.id;
   const updatedProductData = req.body;
+  const images = updatedProductData.images; // New images to be added
   let connection;
   try {
     connection = await pool.getConnection();
@@ -166,40 +117,44 @@ router.put("/:id", isAuth, isAdmin, async (req, res) => {
     // Begin a transaction
     await connection.beginTransaction();
 
-    // Update data in Product_Images table
-    const [updateImageResult] = await connection.execute(
-      "UPDATE Product_Images SET image_url = ? WHERE product_id = ?",
-      [updatedProductData.image, productId]
+    // Remove existing images for the product
+    await connection.execute(
+      "DELETE FROM Product_Images WHERE product_id = ?",
+      [productId]
     );
 
-    if (updateImageResult.affectedRows >= 0) {
-      // If image update is successful, proceed to update data in Products table
-      const [updateProductResult] = await connection.execute(
-        "UPDATE Products SET name = ?, price = ?, brand_id = ?, category_id = ?, stock_quantity = ?, description = ? WHERE product_id = ?",
-        [
-          updatedProductData.name,
-          updatedProductData.price,
-          updatedProductData.brand_id,
-          updatedProductData.category_id,
-          updatedProductData.countInStock,
-          updatedProductData.description,
-          productId,
-        ]
-      );
-
-      if (updateProductResult.affectedRows > 0) {
-        // If product update is successful, commit the transaction
-        await connection.commit();
-        res.status(200).send({ message: "Product Updated", data: updatedProductData });
-      } else {
-        // If product update fails, rollback the transaction
-        await connection.rollback();
-        res.status(404).send({ message: "Product Not Found" });
+    // Insert new images into Product_Images table
+    if (images && images.length > 0) {
+      for (const imageUrl of images) {
+        await connection.execute(
+          "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
+          [productId, imageUrl]
+        );
       }
+    }
+
+    // Update data in Products table
+    const [updateProductResult] = await connection.execute(
+      "UPDATE Products SET name = ?, price = ?, brand_id = ?, category_id = ?, stock_quantity = ?, description = ? WHERE product_id = ?",
+      [
+        updatedProductData.name,
+        updatedProductData.price,
+        updatedProductData.brand_id,
+        updatedProductData.category_id,
+        updatedProductData.countInStock,
+        updatedProductData.description,
+        productId,
+      ]
+    );
+
+    if (updateProductResult.affectedRows > 0) {
+      // If product update is successful, commit the transaction
+      await connection.commit();
+      res.status(200).send({ message: "Product Updated", data: updatedProductData });
     } else {
-      // If image update fails, rollback the transaction
+      // If product update fails, rollback the transaction
       await connection.rollback();
-      res.status(404).send({ message: "Product Images Not Found" });
+      res.status(404).send({ message: "Product Not Found" });
     }
   } catch (error) {
     console.error("Error:", error);
@@ -210,6 +165,8 @@ router.put("/:id", isAuth, isAdmin, async (req, res) => {
     }
   }
 });
+
+
 
 
 router.delete("/:id", isAuth, isAdmin, async (req, res) => {
@@ -258,62 +215,6 @@ router.delete("/:id", isAuth, isAdmin, async (req, res) => {
   }
 });
 
-// router.post("/", isAuth, isAdmin, async (req, res) => {
-//   const newProduct = req.body;
-//   console.log(newProduct)
-//   let connection;
-//   try {
-//     connection = await pool.getConnection();
-
-//     await connection.beginTransaction();
-
-//     const [insertProductResult] = await connection.execute(
-//       "INSERT INTO Products (name, price, brand_id, category_id, stock_quantity, description) VALUES (?, ?, ?, ?, ?, ?)",
-//       [
-//         newProduct.name,
-//         newProduct.price,
-//         newProduct.brand_id,
-//         newProduct.category_id,
-//         newProduct.countInStock,
-//         newProduct.description,
-//       ]
-//     );
-
-//     const productId = insertProductResult.insertId;
-
-//     if (!productId) {
-//       throw new Error("Error in Creating Product.");
-//     }
-
-//     const [insertImageResult] = await connection.execute(
-//       "INSERT INTO Product_Images (product_id, image_url) VALUES (?, ?)",
-//       [productId, newProduct.image]
-//     );
-
-//     if (!insertImageResult.affectedRows) {
-//       throw new Error("Error in Creating Product Image.");
-//     }
-
-//     await connection.commit();
-
-//     newProduct.product_id = productId;
-//     res.status(201).send({ message: "New Product Created", data: newProduct });
-//   } catch (error) {
-//     console.error("Error:", error);
-
-//     try {
-//       await connection.rollback();
-//     } catch (rollbackError) {
-//       console.error("Rollback Error:", rollbackError);
-//     }
-
-//     res.status(500).send({ message: "Internal Server Error" });
-//   } finally {
-//     if (connection) {
-//       connection.release();
-//     }
-//   }
-// });
 router.post("/", isAuth, isAdmin, async (req, res) => {
   const newProduct = req.body;
   console.log(newProduct);

@@ -7,8 +7,10 @@ import userRoute from './routes/userRoute.js';
 import productRoute from './routes/productRoute.js';
 import orderRoute from './routes/orderRoute.js';
 import uploadRoute from './routes/uploadRoute.js';
+import paymentRoute from './routes/paymentRoute.js';
 import categoryRoute from './routes/categoryRoute.js';
 import brandRoute from './routes/brandRoute.js';
+import addressRoute from './routes/addressRoute.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -30,7 +32,9 @@ app.use('/api/users', userRoute);
 app.use('/api/products', productRoute);
 app.use('/api/categories', categoryRoute);
 app.use('/api/brands', brandRoute);
+app.use('/api/payments', paymentRoute);
 app.use('/api/orders', orderRoute);
+app.use('/api/addresses', addressRoute);
 app.get('/api/config/paypal', (req, res) => {
   res.send(config.PAYPAL_CLIENT_ID);
 });

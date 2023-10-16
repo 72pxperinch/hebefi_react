@@ -8,6 +8,7 @@ router.get("/", isAuth, async (req, res) => {
   const orders = await Order.find({}).populate('user');
   res.send(orders);
 });
+
 router.get("/mine", isAuth, async (req, res) => {
   const orders = await Order.find({ user: req.user._id });
   res.send(orders);
@@ -33,6 +34,14 @@ router.delete("/:id", isAuth, isAdmin, async (req, res) => {
 });
 
 router.post("/", isAuth, async (req, res) => {
+  console.log(req.body.orderItems);
+  console.log(req.user);
+  console.log(req.body.shipping)
+  console.log(req.body.payment);
+  console.log(req.body.taxPrice);
+  console.log(req.body.itemsPrice)
+  console.log(req.body.shippingPrice);
+  console.log(req.body.totalPrice);
   const newOrder = new Order({
     orderItems: req.body.orderItems,
     user: req.user._id,
