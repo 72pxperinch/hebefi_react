@@ -4,7 +4,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { register } from "../actions/userActions";
 import bcrypt from "bcryptjs";
 
-function RegisterScreen(props) {
+function RegisterScreen(props) { 
+  const st = useSelector((state) => state)
+  console.log(st)
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [insecurPassword, setInsecurePassword] = useState("");

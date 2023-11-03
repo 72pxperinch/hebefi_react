@@ -10,6 +10,8 @@ function CategoryScreen(props) {
   const productList = useSelector((state) => state.productList);
   const { products, loading, error } = productList;
   const dispatch = useDispatch();
+  const st = useSelector((state) => state)
+  console.log(st)
   useEffect(() => {
     dispatch(listProducts(category));
 

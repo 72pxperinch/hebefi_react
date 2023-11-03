@@ -79,6 +79,8 @@ import {
 } from "../actions/addressActions";
 
 function ShippingScreen(props) {
+  const st = useSelector((state) => state)
+  console.log(st)
   const [selectedAddress, setSelectedAddress] = useState(""); // To store the selected address ID
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");

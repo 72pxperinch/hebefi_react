@@ -12,6 +12,8 @@ function SigninScreen(props) {
   const { loading, userInfo, error } = userSignin;
   const dispatch = useDispatch();
   const redirect = props.location.search ? props.location.search.split("=")[1] : '/';
+  const st = useSelector((state) => state)
+  console.log(st)
   useEffect(() => {
     if (userInfo) {
       props.history.push(redirect);

@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import "./CSS/CartScreen.css";
 function CartScreen(props) {
+  const st = useSelector((state) => state)
+  console.log(st)
   const cart = useSelector((state) => state.cart);
 console.log(cart)
   const { cartItems } = cart;

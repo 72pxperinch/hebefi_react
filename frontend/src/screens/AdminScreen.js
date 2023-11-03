@@ -1,9 +1,12 @@
 // AdminPage.js
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import "./CSS/AdminScreen.css";
 
 const AdminScreen = () => {
+  const st = useSelector((state) => state)
+  console.log(st)
   return (
     <div className="admin-page">
       <h1>Admin Page</h1>

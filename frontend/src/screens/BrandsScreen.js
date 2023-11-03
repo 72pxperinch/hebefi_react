@@ -14,6 +14,8 @@ function BrandsScreen(props) {
   const [description, setDescription] = useState("");
   const brandList = useSelector((state) => state.brandList);
   const { brands } = brandList;
+  const st = useSelector((state) => state)
+  console.log(st)
 
   const brandSave = useSelector((state) => state.brandSave);
   const {

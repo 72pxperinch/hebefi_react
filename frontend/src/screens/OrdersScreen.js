@@ -11,6 +11,8 @@ function OrdersScreen(props) {
   const { loading: loadingDelete, success: successDelete, error: errorDelete } = orderDelete;
 
   const dispatch = useDispatch();
+  const st = useSelector((state) => state)
+  console.log(st)
 
   useEffect(() => {
     dispatch(listOrders());

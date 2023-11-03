@@ -11,6 +11,8 @@ function PaymentsScreen(props) {
   const [id, setId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [user_id, setUser_id] = useState("");
+  const st = useSelector((state) => state)
+  console.log(st)
 
   const paymentList = useSelector((state) => state.paymentList);
   const { payments } = paymentList;

@@ -66,6 +66,7 @@ const savePayment = (payment) => async (dispatch, getState) => {
           Authorization: "Bearer " + userInfo.token,
         },
       });
+      console.log(data);
       dispatch({ type: PAYMENT_SAVE_SUCCESS, payload: data });
     } else {
       const { data } = await Axios.put(

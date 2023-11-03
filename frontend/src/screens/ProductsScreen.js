@@ -11,6 +11,8 @@ import { listCategories } from "../actions/categoryActions";
 import { listBrands } from "../actions/brandActions";
 
 function ProductsScreen(props) {
+  const st = useSelector((state) => state)
+  console.log(st)
   const [modalVisible, setModalVisible] = useState(false);
   const [id, setId] = useState("");
   const [name, setName] = useState("");

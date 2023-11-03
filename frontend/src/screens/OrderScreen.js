@@ -8,6 +8,8 @@ function OrderScreen(props) {
   const orderPay = useSelector(state => state.orderPay);
   const { loading: loadingPay, success: successPay, error: errorPay } = orderPay;
   const dispatch = useDispatch();
+  const st = useSelector((state) => state)
+  console.log(st)
   useEffect(() => {
     if (successPay) {
       props.history.push("/profile");
@@ -24,7 +26,7 @@ function OrderScreen(props) {
 
   const orderDetails = useSelector(state => state.orderDetails);
   const { loading, order, error } = orderDetails;
-
+console.log(order);
   return loading ? <div>Loading ...</div> : error ? <div>{error}</div> :
 
     <div>
@@ -35,8 +37,8 @@ function OrderScreen(props) {
               Shipping
           </h3>
             <div>
-              {order.shipping.address}, {order.shipping.city},
-          {order.shipping.postalCode}, {order.shipping.country},
+              {order.address}, {order.city},
+          {order.postalCode}, {order.country},
           </div>
             <div>
               {order.isDelivered ? "Delivered at " + order.deliveredAt : "Not Delivered."}
@@ -45,7 +47,7 @@ function OrderScreen(props) {
           <div>
             <h3>Payment</h3>
             <div>
-              Payment Method: {order.payment.paymentMethod}
+              Payment Method: {order.paymentMethod}
             </div>
             <div>
               {order.isPaid ? "Paid at " + order.paidAt : "Not Paid."}

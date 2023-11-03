@@ -14,6 +14,8 @@ function AddressesScreen(props) {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
   const [user_id, setUser_id] = useState("");
+  const st = useSelector((state) => state)
+  console.log(st)
 
   const addressList = useSelector((state) => state.addressList);
   const { addresses } = addressList;

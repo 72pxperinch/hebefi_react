@@ -5,6 +5,8 @@ import { listMyOrders } from '../actions/orderActions';
 import { useDispatch, useSelector } from 'react-redux';
 
 function ProfileScreen(props) {
+  const st = useSelector((state) => state)
+  console.log(st)
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');

@@ -6,6 +6,8 @@ import { createOrder } from "../actions/orderActions";
 
 function PlaceOrderScreen(props) {
   const dispatch = useDispatch();
+  const st = useSelector((state) => state);
+  console.log(st);
 
   const cart = useSelector((state) => state.cart);
   const orderCreate = useSelector((state) => state.orderCreate);
@@ -31,7 +33,8 @@ function PlaceOrderScreen(props) {
   // Handle success state
   useEffect(() => {
     if (success) {
-      props.history.push("/order/" + order._id);
+      console.log(order);
+      props.history.push("/order/" + order.data.order_id);
     }
   }, [success, props.history, order]);
 
@@ -44,7 +47,6 @@ function PlaceOrderScreen(props) {
   } else if (!payment.paymentMethod) {
     props.history.push("/payment");
   }
-
 
   const itemsPrice = cartItems.reduce((a, c) => a + c.price * c.qty, 0);
   const shippingPrice = itemsPrice > 100 ? 0 : 10;
@@ -65,7 +67,7 @@ function PlaceOrderScreen(props) {
       })
     );
   };
-  
+
   return (
     <div>
       <CheckoutSteps step1 step2 step3 step4></CheckoutSteps>

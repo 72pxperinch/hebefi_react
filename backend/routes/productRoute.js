@@ -89,9 +89,11 @@ router.get("/:id", async (req, res) => {
 
     if (results.length === 1) {
       const product = results[0];
+      console.log(product);
       // Convert the comma-separated images string to an array
       product.images = product.images ? product.images.split(",") : [];
       res.send(product);
+      console.log(product);
     } else {
       res.status(404).send({ message: "Product Not Found." });
     }

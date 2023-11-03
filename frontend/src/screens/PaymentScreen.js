@@ -8,6 +8,8 @@ function PaymentScreen(props) {
   const [paymentId, setPaymentId] = useState('');
   const [creatingNewPayment, setCreatingNewPayment] = useState(false);
   const user_id = useSelector((state) => state.userSignin.userInfo._id);
+  const st = useSelector((state) => state)
+  console.log(st)
 
   const dispatch = useDispatch();
 
