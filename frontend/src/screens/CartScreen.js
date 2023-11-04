@@ -1,15 +1,19 @@
-import React, { useEffect } from "react";
+import React, {useEffect} from "react";
 import { addToCart, removeFromCart } from "../actions/cartActions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import "./CSS/CartScreen.css";
+import { createOrder } from "../actions/orderActions";
+
 function CartScreen(props) {
+
   const st = useSelector((state) => state)
   console.log(st)
-  const cart = useSelector((state) => state.cart);
-console.log(cart)
-  const { cartItems } = cart;
 
+  const orderCreate = useSelector((state) => state.orderCreate);
+  const { loading, success, error, order } = orderCreate;
+  const cart = useSelector((state) => state.cart);
+  const { cartItems } = cart;
   const productId = props.match.params.id;
   const qty = props.location.search
     ? Number(props.location.search.split("=")[1])
@@ -18,15 +22,32 @@ console.log(cart)
   const removeFromCartHandler = (productId) => {
     dispatch(removeFromCart(productId));
   };
-  useEffect(() => {
-    if (productId) {
-      dispatch(addToCart(productId, qty));
-    }
-  }, []);
 
+  const itemsPrice = cartItems.reduce((a, c) => a + c.price * c.qty, 0);
+  const shippingPrice = itemsPrice > 100 ? 0 : 10;
+  const taxPrice = 0.15 * itemsPrice;
+  const totalPrice = itemsPrice + shippingPrice + taxPrice;
   const checkoutHandler = () => {
-    props.history.push("/signin?redirect=shipping");
+
+    dispatch(
+      createOrder({
+        orderItems: cartItems,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+      })
+    );
+
+  console.log(st)
   };
+
+
+  useEffect(() => {
+    if (success) {
+      props.history.push("/signin?redirect=shipping/" + order.data.order_id);
+    }
+  }, [success, order]);
 
   return (
     <div className="cartbox">

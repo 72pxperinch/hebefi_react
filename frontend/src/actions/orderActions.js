@@ -21,22 +21,44 @@ import {
 } from "../constants/orderConstants";
 
 const createOrder = (order) => async (dispatch, getState) => {
+  console.log(order)
   try {
     dispatch({ type: ORDER_CREATE_REQUEST, payload: order });
     const {
       userSignin: { userInfo },
     } = getState();
-    const { data } = await Axios.post("/api/orders", order, {
-      headers: {
-        Authorization: " Bearer " + userInfo.token,
-      },
-    });
-    console.log("Create order: " + data);
-    dispatch({ type: ORDER_CREATE_SUCCESS, payload: data });
+
+    // Check if 'order.id' and 'order.address' exist
+    if (order.id && order.address) {
+      const { data } = await Axios.put(`/api/orders/address` + order.id , order, {
+        headers: {
+          Authorization: "Bearer " + userInfo.token,
+        },
+      });
+      console.log("Update order: " + data);
+      dispatch({ type: ORDER_CREATE_SUCCESS, payload: data });
+    } else if (order.id && order.payment) {
+      const { data } = await Axios.put(`/api/orders/payment` + order.id , order, {
+        headers: {
+          Authorization: "Bearer " + userInfo.token,
+        },
+      });
+      console.log("Update order: " + data);
+      dispatch({ type: ORDER_CREATE_SUCCESS, payload: data });
+    } else {
+      const { data } = await Axios.post("/api/orders", order, {
+        headers: {
+          Authorization: "Bearer " + userInfo.token,
+        },
+      });
+      console.log("Create order: " + data);
+      dispatch({ type: ORDER_CREATE_SUCCESS, payload: data });
+    }
   } catch (error) {
     dispatch({ type: ORDER_CREATE_FAIL, payload: error.message });
   }
 };
+
 
 const listMyOrders = () => async (dispatch, getState) => {
   try {

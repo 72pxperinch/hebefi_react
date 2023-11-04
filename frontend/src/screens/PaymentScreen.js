@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { savePayment, listPayments, detailsPayment } from '../actions/paymentActions';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { createOrder } from "../actions/orderActions";
 
 function PaymentScreen(props) {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentId, setPaymentId] = useState('');
+  const orderCreate = useSelector((state) => state.orderCreate);
+  const { order } = orderCreate;
+  const paymentSave = useSelector((state) => state.paymentSave);
+  const { success:successSave, savedPayment } = paymentSave;
   const [creatingNewPayment, setCreatingNewPayment] = useState(false);
   const user_id = useSelector((state) => state.userSignin.userInfo._id);
   const st = useSelector((state) => state)
@@ -19,15 +24,30 @@ function PaymentScreen(props) {
   const submitHandler = (e) => {
     e.preventDefault();
     if (!creatingNewPayment) {
-      // If an existing payment is selected, dispatch detailsPayment with payment ID.
-      console.log(paymentId)
-      dispatch(detailsPayment(paymentId));
+      dispatch(
+        createOrder({
+          id: props.match.params.id,
+          payment: paymentId
+        })
+      );
+      props.history.push('/signin?redirect=placeorder/' + props.match.params.id);
     } else {
       // If creating a new payment, dispatch savePayment with the payment method data.
       dispatch(savePayment({ paymentMethod, user_id }));
     }
-    props.history.push('placeorder');
   };
+
+  useEffect(() => {
+    if (successSave) {
+      dispatch(
+        createOrder({
+          id: props.match.params.id,
+          payments: savedPayment.data.payment_id 
+        })
+      );
+      props.history.push("/signin?redirect=payment/" + props.match.params.id);
+    }
+  }, [successSave, savedPayment]);
 
   useEffect(() => {
     // Fetch the list of user's payments.

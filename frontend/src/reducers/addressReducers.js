@@ -39,12 +39,12 @@ function addressDeleteReducer(state = { address: {} }, action) {
   }
 }
 
-function addressSaveReducer(state = { address: {} }, action) {
+function addressSaveReducer(state = { savedAddress: {} }, action) {
   switch (action.type) {
     case ADDRESS_SAVE_REQUEST:
       return { loading: true };
     case ADDRESS_SAVE_SUCCESS:
-      return { loading: false, success: true, address: action.payload };
+      return { loading: false, success: true, savedAddress: action.payload };
     case ADDRESS_SAVE_FAIL:
       return { loading: false, error: action.payload };
     default:

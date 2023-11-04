@@ -42,11 +42,11 @@ function App() {
           <Route path="/profile" component={ProfileScreen} />
           <Route path="/order/:id" component={OrderScreen} />
           <Route path="/products" component={ProductsScreen} />
-          <Route path="/shipping" component={ShippingScreen} />
+          <Route path="/shipping/:id" component={ShippingScreen} />
           <Route path="/addresses" component={AddressesScreen} />
-          <Route path="/payment" component={PaymentScreen} />
+          <Route path="/payment/:id" component={PaymentScreen} />
           <Route path="/payments" component={PaymentsScreen} />
-          <Route path="/placeorder" component={PlaceOrderScreen} />
+          <Route path="/placeorder/:id" component={PlaceOrderScreen} />
           <Route path="/signin" component={SigninScreen} />
           <Route path="/register" component={RegisterScreen} />
           <Route path="/product/:id" component={ProductScreen} />

@@ -1,73 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { Link } from 'react-router-dom';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { saveShipping } from '../actions/cartActions';
-// import CheckoutSteps from '../components/CheckoutSteps';
-// import { detailsAddress, saveAddress, listAddress } from '../actions/addressActions';
-
-// function ShippingScreen(props) {
-
-//   const [address, setAddress] = useState('');
-//   const [city, setCity] = useState('');
-//   const [postalCode, setPostalCode] = useState('');
-//   const [country, setCountry] = useState('');
-
-//   const dispatch = useDispatch();
-
-//   const submitHandler = (e) => {
-//     e.preventDefault();
-//     dispatch(saveAddress({ address, city, postalCode, country }));
-//     props.history.push('payment');
-//   }
-//   return <div>
-//     <CheckoutSteps step1 step2 ></CheckoutSteps>
-//     <div className="form">
-//       <form onSubmit={submitHandler} >
-//         <ul className="form-container">
-//           <li>
-//             <h2>Shipping</h2>
-//           </li>
-
-//           <li>
-//             <label htmlFor="address">
-//               Address
-//           </label>
-//             <input type="text" name="address" id="address" onChange={(e) => setAddress(e.target.value)}>
-//             </input>
-//           </li>
-//           <li>
-//             <label htmlFor="city">
-//               City
-//           </label>
-//             <input type="text" name="city" id="city" onChange={(e) => setCity(e.target.value)}>
-//             </input>
-//           </li>
-//           <li>
-//             <label htmlFor="postalCode">
-//               Postal Code
-//           </label>
-//             <input type="text" name="postalCode" id="postalCode" onChange={(e) => setPostalCode(e.target.value)}>
-//             </input>
-//           </li>
-//           <li>
-//             <label htmlFor="country">
-//               Country
-//           </label>
-//             <input type="text" name="country" id="country" onChange={(e) => setCountry(e.target.value)}>
-//             </input>
-//           </li>
-
-//           <li>
-//             <button type="submit" className="button primary">Continue</button>
-//           </li>
-
-//         </ul>
-//       </form>
-//     </div>
-//   </div>
-// }
-// export default ShippingScreen;
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -77,8 +7,14 @@ import {
   saveAddress,
   listAddress,
 } from "../actions/addressActions";
+import { createOrder } from "../actions/orderActions";
 
 function ShippingScreen(props) {
+  console.log(props)
+  const orderCreate = useSelector((state) => state.orderCreate);
+  const { order } = orderCreate;
+  const addressSave = useSelector((state) => state.addressSave);
+  const { success:successSave, savedAddress } = addressSave;
   const st = useSelector((state) => state)
   console.log(st)
   const [selectedAddress, setSelectedAddress] = useState(""); // To store the selected address ID
@@ -97,15 +33,33 @@ function ShippingScreen(props) {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (selectedAddress) {
-      // If an address is selected, dispatch detailsAddress with the selected address's ID
-      dispatch(detailsAddress(selectedAddress));
+    if (selectedAddress) {  
+      console.log(selectedAddress); 
+      dispatch(
+        createOrder({
+          id: props.match.params.id,
+          address: selectedAddress
+        })
+      );
+      props.history.push("/signin?redirect=payment/" + order.data.order_id);
     } else {
       // If a new address is created, dispatch saveAddress with the new address details
       dispatch(saveAddress({ address, city, postalCode, country, user_id }));
     }
-    props.history.push("payment");
   };
+
+  useEffect(() => {
+    if (successSave) {
+      console.log(successSave)
+      dispatch(
+        createOrder({
+          id: props.match.params.id,
+          address: savedAddress.data.address_id 
+        })
+      );
+      props.history.push("/signin?redirect=payment/" + order.data.order_id);
+    }
+  }, [successSave, savedAddress]);
 
   return (
     <div>

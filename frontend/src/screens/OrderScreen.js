@@ -1,108 +1,111 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { createOrder, detailsOrder, payOrder } from '../actions/orderActions';
-import PaypalButton from '../components/PaypalButton';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { createOrder, detailsOrder, payOrder } from "../actions/orderActions";
+import PaypalButton from "../components/PaypalButton";
 function OrderScreen(props) {
-
-  const orderPay = useSelector(state => state.orderPay);
-  const { loading: loadingPay, success: successPay, error: errorPay } = orderPay;
+  const orderPay = useSelector((state) => state.orderPay);
+  const {
+    loading: loadingPay,
+    success: successPay,
+    error: errorPay,
+  } = orderPay;
   const dispatch = useDispatch();
-  const st = useSelector((state) => state)
-  console.log(st)
+  const st = useSelector((state) => state);
+  console.log(st);
+  const orderDetails = useSelector((state) => state.orderDetails);
+  const { loading, detailedOrder, error } = orderDetails;
+
+  const [isLoading, setIsLoading] = useState(true);
+
+
   useEffect(() => {
     if (successPay) {
       props.history.push("/profile");
     } else {
       dispatch(detailsOrder(props.match.params.id));
     }
-    return () => {
-    };
+    return () => {};
   }, [successPay]);
+  
+  useEffect(() => {
+    if (detailedOrder) {
+      setIsLoading(false);
+    }
+  }, [detailedOrder]);
 
-  const handleSuccessPayment = (paymentResult) => {
-    dispatch(payOrder(order, paymentResult));
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
-  const orderDetails = useSelector(state => state.orderDetails);
-  const { loading, order, error } = orderDetails;
-console.log(order);
-  return loading ? <div>Loading ...</div> : error ? <div>{error}</div> :
 
+  const handleSuccessPayment = (paymentResult) => {
+    dispatch(payOrder(detailedOrder, paymentResult));
+  };
+  console.log(detailedOrder);
+  return loading ? (
+    <div>Loading ...</div>
+  ) : error ? (
+    <div>{error}</div>
+  ) : (
     <div>
       <div className="placeorder">
         <div className="placeorder-info">
           <div>
-            <h3>
-              Shipping
-          </h3>
+            <h3>Shipping</h3>
             <div>
-              {order.address}, {order.city},
-          {order.postalCode}, {order.country},
-          </div>
+              {detailedOrder.address}, {detailedOrder.city},
+              {detailedOrder.postalCode}, {detailedOrder.country},
+            </div>
             <div>
-              {order.isDelivered ? "Delivered at " + order.deliveredAt : "Not Delivered."}
+              {detailedOrder.isDelivered
+                ? "Delivered at " + detailedOrder.deliveredAt
+                : "Not Delivered."}
             </div>
           </div>
           <div>
             <h3>Payment</h3>
+            <div>Payment Method: {detailedOrder.paymentMethod}</div>
             <div>
-              Payment Method: {order.paymentMethod}
-            </div>
-            <div>
-              {order.isPaid ? "Paid at " + order.paidAt : "Not Paid."}
+              {detailedOrder.isPaid
+                ? "Paid at " + detailedOrder.paidAt
+                : "Not Paid."}
             </div>
           </div>
           <div>
             <ul className="cart-list-container">
               <li>
-                <h3>
-                  Shopping Cart
-          </h3>
-                <div>
-                  Price
-          </div>
+                <h3>Shopping Cart</h3>
+                <div>Price</div>
               </li>
-              {
-                order.orderItems.length === 0 ?
-                  <div>
-                    Cart is empty
-          </div>
-                  :
-                  order.orderItems.map(item =>
-                    <li key={item._id}>
-                      <div className="cart-image">
-                        <img src={item.image} alt="product" />
+              {detailedOrder.orderItems.length === 0 ? (
+                <div>Cart is empty</div>
+              ) : (
+                detailedOrder.orderItems.map((item) => (
+                  <li key={item.product_id}>
+                    <div className="cart-image">
+                      <img src={item.image} alt="product" />
+                    </div>
+                    <div className="cart-name">
+                      <div>
+                        <Link to={"/product/" + item.product}>{item.name}</Link>
                       </div>
-                      <div className="cart-name">
-                        <div>
-                          <Link to={"/product/" + item.product}>
-                            {item.name}
-                          </Link>
-
-                        </div>
-                        <div>
-                          Qty: {item.qty}
-                        </div>
-                      </div>
-                      <div className="cart-price">
-                        ${item.price}
-                      </div>
-                    </li>
-                  )
-              }
+                      <div>Qty: {item.qty}</div>
+                    </div>
+                    <div className="cart-price">${item.price}</div>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
-
-
         </div>
         <div className="placeorder-action">
           <ul>
             <li className="placeorder-actions-payment">
               {loadingPay && <div>Finishing Payment...</div>}
-              {!order.isPaid &&
+              {!detailedOrder.isPaid &&
                 <PaypalButton
-                  amount={order.totalPrice}
+                  amount={detailedOrder.totalPrice}
                   onSuccess={handleSuccessPayment} />
               }
             </li>
@@ -111,29 +114,25 @@ console.log(order);
             </li>
             <li>
               <div>Items</div>
-              <div>${order.itemsPrice}</div>
+              <div>${detailedOrder.itemsPrice}</div>
             </li>
             <li>
               <div>Shipping</div>
-              <div>${order.shippingPrice}</div>
+              <div>${detailedOrder.shippingPrice}</div>
             </li>
             <li>
               <div>Tax</div>
-              <div>${order.taxPrice}</div>
+              <div>${detailedOrder.taxPrice}</div>
             </li>
             <li>
               <div>Order Total</div>
-              <div>${order.totalPrice}</div>
+              <div>${detailedOrder.totalPrice}</div>
             </li>
           </ul>
-
-
-
         </div>
-
       </div>
     </div>
-
+  );
 }
 
 export default OrderScreen;

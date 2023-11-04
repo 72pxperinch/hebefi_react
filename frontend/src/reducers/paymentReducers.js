@@ -52,12 +52,12 @@ function paymentDetailsReducer(state = { payment: {} }, action) {
   }
 }
 
-function paymentSaveReducer(state = { payment: {} }, action) {
+function paymentSaveReducer(state = { savedPayment: {} }, action) {
   switch (action.type) {
     case PAYMENT_SAVE_REQUEST:
       return { loading: true };
     case PAYMENT_SAVE_SUCCESS:
-      return { loading: false, success: true, payment: action.payload };
+      return { loading: false, success: true, savedPayment: action.payload };
     case PAYMENT_SAVE_FAIL:
       return { loading: false, error: action.payload };
     default:

@@ -2,70 +2,55 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import CheckoutSteps from "../components/CheckoutSteps";
-import { createOrder } from "../actions/orderActions";
+import { detailsOrder, createOrder } from "../actions/orderActions";
 
 function PlaceOrderScreen(props) {
   const dispatch = useDispatch();
   const st = useSelector((state) => state);
   console.log(st);
 
-  const cart = useSelector((state) => state.cart);
+  // const cart = useSelector((state) => state.cart);
+  // const { cartItems } = cart;
   const orderCreate = useSelector((state) => state.orderCreate);
-  const addressDetails = useSelector((state) => state.addressDetails.address);
-  const paymentDetails = useSelector((state) => state.paymentDetails.payment);
+  const { loading, success: successCreate, error, order } = orderCreate;
 
-  const [payment, setPayment] = useState("");
-  const [address, setAddress] = useState("");
+  const orderDetails = useSelector((state) => state.orderDetails);
+  const { success: successDetail, detailedOrder } = orderDetails;
+
   const [isLoading, setIsLoading] = useState(true);
 
   // Handle loading state
+  useEffect(
+    () => {
+      dispatch(detailsOrder(props.match.params.id));
+    },
+    []
+  );
   useEffect(() => {
-    if (addressDetails && paymentDetails) {
-      setAddress(addressDetails);
-      setPayment(paymentDetails);
+    if (detailedOrder) {
+      console.log(detailedOrder);
       setIsLoading(false);
     }
-  }, [addressDetails, paymentDetails]);
-
-  const { loading, success, error, order } = orderCreate;
-  const { cartItems } = cart;
-
-  // Handle success state
-  useEffect(() => {
-    if (success) {
-      console.log(order);
-      props.history.push("/order/" + order.data.order_id);
-    }
-  }, [success, props.history, order]);
+  }, [detailedOrder]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!address.address) {
-    props.history.push("/shipping");
-  } else if (!payment.paymentMethod) {
-    props.history.push("/payment");
+  if (!detailedOrder.address) {
+    props.history.push("/shipping/" + order.data.order_id);
+  } else if (!detailedOrder.paymentMethod) {
+    props.history.push("/payment/" + order.data.order_id);
   }
-
+  console.log(detailedOrder);
+  const cartItems = detailedOrder.orderItems;
   const itemsPrice = cartItems.reduce((a, c) => a + c.price * c.qty, 0);
   const shippingPrice = itemsPrice > 100 ? 0 : 10;
   const taxPrice = 0.15 * itemsPrice;
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
   const placeOrderHandler = () => {
-    // create an order
-    dispatch(
-      createOrder({
-        orderItems: cartItems,
-        address_id: address.address_id,
-        payment_id: payment.payment_id,
-        itemsPrice,
-        shippingPrice,
-        taxPrice,
-        totalPrice,
-      })
-    );
+    props.history.push("/order/" + props.match.params.id);
   };
 
   return (
@@ -76,13 +61,13 @@ function PlaceOrderScreen(props) {
           <div>
             <h3>Shipping</h3>
             <div>
-              {address.address}, {address.city},{address.postalCode},{" "}
-              {address.country},
+              {detailedOrder.address}, {detailedOrder.city},
+              {detailedOrder.postalCode}, {detailedOrder.country},
             </div>
           </div>
           <div>
             <h3>Payment</h3>
-            <div>Payment Method: {payment.paymentMethod}</div>
+            <div>Payment Method: {detailedOrder.paymentMethod}</div>
           </div>
           <div>
             <ul className="cart-list-container">

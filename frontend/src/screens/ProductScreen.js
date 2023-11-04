@@ -5,6 +5,7 @@ import { detailsProduct, saveProductReview } from '../actions/productActions';
 import Rating from './Components/Rating';
 import { PRODUCT_REVIEW_SAVE_RESET } from '../constants/productConstants';
 import "./CSS/ProductScreen.css"
+import { addToCart} from "../actions/cartActions";
 
 function ProductScreen(props) {
   const [qty, setQty] = useState(1);
@@ -44,7 +45,7 @@ function ProductScreen(props) {
     );
   };
   const handleAddToCart = () => {
-    props.history.push('/cart/' + props.match.params.id + '?qty=' + qty);
+    dispatch(addToCart(props.match.params.id, qty));
   };
 
   return (
