@@ -121,6 +121,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.get('/createadmin', async (req, res) => {
+  console.log("Triggered");
   let connection;
   try {
     connection = await pool.getConnection();
